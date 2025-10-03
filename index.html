@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Vendas</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>📊 Gestão Vendas</h2>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-item active" data-page="dashboard">
+                <span class="icon">📈</span>
+                Dashboard
+            </button>
+            <button class="nav-item" data-page="products">
+                <span class="icon">📦</span>
+                Produtos
+            </button>
+            <button class="nav-item" data-page="sales">
+                <span class="icon">💰</span>
+                Vendas
+            </button>
+            <button class="nav-item" data-page="debtors">
+                <span class="icon">📋</span>
+                Devedores
+            </button>
+            <button class="nav-item" data-page="reports">
+                <span class="icon">📊</span>
+                Relatórios
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page active">
+            <header class="page-header">
+                <h1>Dashboard</h1>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="day">Hoje</button>
+                    <button class="period-btn" data-period="week">Semana</button>
+                    <button class="period-btn" data-period="month">Mês</button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Vendas do Período</p>
+                        <h3 class="stat-value" id="periodSales">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Lucro do Período</p>
+                        <h3 class="stat-value" id="periodProfit">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total de Vendas</p>
+                        <h3 class="stat-value" id="totalSalesCount">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Produtos em Estoque</p>
+                        <h3 class="stat-value" id="productsInStock">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Vendas por Período</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Produtos Mais Vendidos</h3>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Lucro Acumulado</h3>
+                <canvas id="profitChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Products Page -->
+        <section id="products" class="page">
+            <header class="page-header">
+                <h1>Produtos</h1>
+                <button class="btn-primary" id="addProductBtn">+ Adicionar Produto</button>
+            </header>
+
+            <div class="search-bar">
+                <input type="text" id="searchProduct" placeholder="🔍 Buscar produto...">
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Preço Compra</th>
+                            <th>Qtd/Pacote</th>
+                            <th>Preço Venda</th>
+                            <th>Lucro</th>
+                            <th>Estoque</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sales Page -->
+        <section id="sales" class="page">
+            <header class="page-header">
+                <h1>Vendas</h1>
+                <button class="btn-primary" id="addSaleBtn">+ Registrar Venda</button>
+            </header>
+
+            <div class="search-bar">
+                <input type="text" id="searchSale" placeholder="🔍 Buscar por cliente ou produto...">
+                <select id="filterPaymentStatus" style="margin-left: 1rem; padding: 0.5rem;">
+                    <option value="">Todos os status</option>
+                    <option value="paid">Pago</option>
+                    <option value="partial">Parcial</option>
+                    <option value="unpaid">Não Pago</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Valor Total</th>
+                            <th>Status Pagamento</th>
+                            <th>Saldo</th>
+                            <th>Lucro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <!-- Sales will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Debtors Page -->
+        <section id="debtors" class="page">
+            <header class="page-header">
+                <h1>Clientes Devedores</h1>
+            </header>
+
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon">💳</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total em Aberto</p>
+                        <h3 class="stat-value" id="totalDebt">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Clientes Devedores</p>
+                        <h3 class="stat-value" id="debtorsCount">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Total de Vendas</th>
+                            <th>Total Pago</th>
+                            <th>Saldo em Aberto</th>
+                            <th>Data Prevista</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debtorsTableBody">
+                        <!-- Debtors will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Reports Page -->
+        <section id="reports" class="page">
+            <header class="page-header">
+                <h1>Relatórios</h1>
+                <button class="btn-primary" id="exportReportBtn">📥 Exportar CSV</button>
+            </header>
+
+            <div class="report-filters">
+                <div class="filter-group">
+                    <label>Data Início:</label>
+                    <input type="date" id="reportStartDate">
+                </div>
+                <div class="filter-group">
+                    <label>Data Fim:</label>
+                    <input type="date" id="reportEndDate">
+                </div>
+                <button class="btn-secondary" id="generateReportBtn">Gerar Relatório</button>
+            </div>
+
+            <div class="report-summary">
+                <div class="summary-card">
+                    <h3>Total de Vendas</h3>
+                    <p class="summary-value" id="reportTotalSales">R$ 0,00</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Lucro Total</h3>
+                    <p class="summary-value" id="reportTotalProfit">R$ 0,00</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Número de Vendas</h3>
+                    <p class="summary-value" id="reportSalesCount">0</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Valor</th>
+                            <th>Lucro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <!-- Report data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productModalTitle">Adicionar Produto</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Nome do Produto *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço de Compra *</label>
+                        <input type="number" id="productBuyPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade por Pacote *</label>
+                        <input type="number" id="productPackQty" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço de Venda *</label>
+                        <input type="number" id="productSellPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estoque Inicial</label>
+                        <input type="number" id="productStock" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Lucro por Unidade</label>
+                    <input type="text" id="productProfit" readonly>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div id="saleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="saleModalTitle">Registrar Venda</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="saleForm">
+                <input type="hidden" id="saleId">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <input type="text" id="saleClient" required>
+                </div>
+                <div class="form-group">
+                    <label>Produto *</label>
+                    <select id="saleProduct" required>
+                        <option value="">Selecione um produto</option>
+                    </select>
+                    <small id="stockAvailable" style="color: var(--text-secondary); margin-top: 0.25rem; display: block;"></small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantidade *</label>
+                        <input type="number" id="saleQuantity" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data *</label>
+                        <input type="date" id="saleDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Valor Total</label>
+                    <input type="text" id="saleTotal" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Status de Pagamento *</label>
+                    <select id="salePaymentStatus" required>
+                        <option value="paid">Pago Totalmente</option>
+                        <option value="partial">Pago Parcialmente</option>
+                        <option value="unpaid">Não Pago</option>
+                    </select>
+                </div>
+                <div class="form-group" id="amountPaidGroup" style="display: none;">
+                    <label>Valor Pago</label>
+                    <input type="number" id="saleAmountPaid" step="0.01" min="0">
+                </div>
+                <div class="form-group" id="dueDateGroup" style="display: none;">
+                    <label>Data Prevista de Pagamento</label>
+                    <input type="date" id="saleDueDate">
+                </div>
+                <div class="form-group" id="balanceGroup" style="display: none;">
+                    <label>Saldo em Aberto</label>
+                    <input type="text" id="saleBalance" readonly>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/sales.js"></script>
+    <script src="js/debtors.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
