@@ -50,6 +50,45 @@
                 </div>
             </header>
 
+            <!-- Added financial status cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total Investido</p>
+                        <h3 class="stat-value" id="totalInvestment">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total de Receitas</p>
+                        <h3 class="stat-value" id="totalRevenue">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total de Vendas</p>
+                        <h3 class="stat-value" id="totalSales">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card" id="realBalanceCard">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Saldo Real</p>
+                        <h3 class="stat-value" id="realBalance">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Status Financeiro</p>
+                        <h3 class="stat-value" id="financialStatus">-</h3>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">💵</div>
@@ -114,10 +153,11 @@
                     <thead>
                         <tr>
                             <th>Nome</th>
-                            <th>Preço Compra</th>
-                            <th>Qtd/Pacote</th>
+                            <th>Investimento</th>
+                            <th>Qtd Inicial</th>
                             <th>Preço Venda</th>
-                            <th>Lucro</th>
+                            <th>Receita</th>
+                            <th>Saldo</th>
                             <th>Estoque</th>
                             <th>Ações</th>
                         </tr>
@@ -277,29 +317,38 @@
                     <label>Nome do Produto *</label>
                     <input type="text" id="productName" required>
                 </div>
+                <!-- Added acquisition cost fields -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Preço de Compra *</label>
-                        <input type="number" id="productBuyPrice" step="0.01" required>
+                        <label>Custo Total de Aquisição *</label>
+                        <input type="number" id="productAcquisitionCost" step="0.01" required placeholder="Quanto você pagou no total">
                     </div>
                     <div class="form-group">
-                        <label>Quantidade por Pacote *</label>
-                        <input type="number" id="productPackQty" required>
+                        <label>Quantidade Inicial Comprada *</label>
+                        <input type="number" id="productInitialStock" required placeholder="Quantas unidades comprou">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label>Custo Unitário (Calculado)</label>
+                    <input type="text" id="productUnitCost" readonly>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Preço de Venda *</label>
+                        <label>Preço de Venda por Unidade *</label>
                         <input type="number" id="productSellPrice" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label>Estoque Inicial</label>
+                        <label>Estoque Atual</label>
                         <input type="number" id="productStock" value="0">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Lucro por Unidade</label>
+                    <label>Lucro por Unidade (Calculado)</label>
                     <input type="text" id="productProfit" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Break-even (Unidades para recuperar investimento)</label>
+                    <input type="text" id="productBreakEven" readonly>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary cancel-btn">Cancelar</button>

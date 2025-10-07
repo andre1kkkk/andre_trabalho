@@ -19,10 +19,9 @@ class ProductsManager {
     document.getElementById("productForm").addEventListener("submit", (e) => this.handleSubmit(e))
     document.getElementById("searchProduct").addEventListener("input", (e) => this.handleSearch(e))
 
-    // Calculate profit on price changes
-    document.getElementById("productBuyPrice").addEventListener("input", () => this.calculateProfit())
-    document.getElementById("productSellPrice").addEventListener("input", () => this.calculateProfit())
-    document.getElementById("productPackQty").addEventListener("input", () => this.calculateProfit())
+    document.getElementById("productAcquisitionCost").addEventListener("input", () => this.calculateCosts())
+    document.getElementById("productInitialStock").addEventListener("input", () => this.calculateCosts())
+    document.getElementById("productSellPrice").addEventListener("input", () => this.calculateCosts())
 
     // Modal close handlers
     document.querySelectorAll("#productModal .close-btn, #productModal .cancel-btn").forEach((btn) => {
@@ -45,13 +44,13 @@ class ProductsManager {
     }
   }
 
-  renderProducts(products) {
+  async renderProducts(products) {
     const tbody = document.getElementById("productsTableBody")
 
     if (products.length === 0) {
       tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 3rem;">
+                    <td colspan="8" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <div class="empty-state-icon">📦</div>
                             <h3>Nenhum produto cadastrado</h3>
@@ -63,21 +62,33 @@ class ProductsManager {
       return
     }
 
+    // Get all sales to calculate revenue per product
+    const sales = await window.db.getAll("sales")
+
     tbody.innerHTML = products
       .map((product) => {
-        const profit = this.calculateProductProfit(product)
-        const profitPercent = ((profit / product.buyPrice) * 100).toFixed(1)
+        const investment = product.acquisitionCost || 0
+        const initialStock = product.initialStock || 0
+        const unitCost = initialStock > 0 ? investment / initialStock : 0
+
+        // Calculate total revenue from sales of this product
+        const productSales = sales.filter((s) => s.productId === product.id)
+        const revenue = productSales.reduce((sum, sale) => sum + sale.total, 0)
+
+        // Calculate real balance
+        const balance = revenue - investment
+        const balanceColor = balance >= 0 ? "var(--success)" : "var(--danger)"
+        const balanceIcon = balance >= 0 ? "✅" : "❌"
 
         return `
                 <tr>
                     <td><strong>${product.name}</strong></td>
-                    <td>R$ ${product.buyPrice.toFixed(2)}</td>
-                    <td>${product.packQty} un</td>
+                    <td>R$ ${investment.toFixed(2)}</td>
+                    <td>${initialStock} un</td>
                     <td>R$ ${product.sellPrice.toFixed(2)}</td>
-                    <td>
-                        <span style="color: var(--success)">
-                            R$ ${profit.toFixed(2)} (${profitPercent}%)
-                        </span>
+                    <td>R$ ${revenue.toFixed(2)}</td>
+                    <td style="color: ${balanceColor}">
+                        ${balanceIcon} R$ ${balance.toFixed(2)}
                     </td>
                     <td>${product.stock || 0} un</td>
                     <td>
@@ -96,11 +107,6 @@ class ProductsManager {
       .join("")
   }
 
-  calculateProductProfit(product) {
-    const costPerUnit = product.buyPrice / product.packQty
-    return product.sellPrice - costPerUnit
-  }
-
   openModal(product = null) {
     console.log("[v0] Opening product modal", product)
     const modal = document.getElementById("productModal")
@@ -114,12 +120,12 @@ class ProductsManager {
       document.getElementById("productModalTitle").textContent = "Editar Produto"
       document.getElementById("productId").value = product.id
       document.getElementById("productName").value = product.name
-      document.getElementById("productBuyPrice").value = product.buyPrice
-      document.getElementById("productPackQty").value = product.packQty
+      document.getElementById("productAcquisitionCost").value = product.acquisitionCost || 0
+      document.getElementById("productInitialStock").value = product.initialStock || 0
       document.getElementById("productSellPrice").value = product.sellPrice
       document.getElementById("productStock").value = product.stock || 0
       this.currentEditId = product.id
-      this.calculateProfit()
+      this.calculateCosts()
     } else {
       // Add mode
       document.getElementById("productModalTitle").textContent = "Adicionar Produto"
@@ -132,16 +138,21 @@ class ProductsManager {
     document.getElementById("productModal").classList.remove("active")
   }
 
-  calculateProfit() {
-    const buyPrice = Number.parseFloat(document.getElementById("productBuyPrice").value) || 0
-    const packQty = Number.parseInt(document.getElementById("productPackQty").value) || 1
+  calculateCosts() {
+    const acquisitionCost = Number.parseFloat(document.getElementById("productAcquisitionCost").value) || 0
+    const initialStock = Number.parseInt(document.getElementById("productInitialStock").value) || 1
     const sellPrice = Number.parseFloat(document.getElementById("productSellPrice").value) || 0
 
-    const costPerUnit = buyPrice / packQty
-    const profit = sellPrice - costPerUnit
-    const profitPercent = buyPrice > 0 ? ((profit / costPerUnit) * 100).toFixed(1) : 0
+    const unitCost = acquisitionCost / initialStock
+    const profitPerUnit = sellPrice - unitCost
+    const profitPercent = unitCost > 0 ? ((profitPerUnit / unitCost) * 100).toFixed(1) : 0
 
-    document.getElementById("productProfit").value = `R$ ${profit.toFixed(2)} (${profitPercent}%)`
+    // Calculate break-even point (how many units need to be sold to recover investment)
+    const breakEven = profitPerUnit > 0 ? Math.ceil(acquisitionCost / profitPerUnit) : "∞"
+
+    document.getElementById("productUnitCost").value = `R$ ${unitCost.toFixed(2)}`
+    document.getElementById("productProfit").value = `R$ ${profitPerUnit.toFixed(2)} (${profitPercent}%)`
+    document.getElementById("productBreakEven").value = `${breakEven} unidades`
   }
 
   async handleSubmit(e) {
@@ -150,8 +161,8 @@ class ProductsManager {
 
     const productData = {
       name: document.getElementById("productName").value,
-      buyPrice: Number.parseFloat(document.getElementById("productBuyPrice").value),
-      packQty: Number.parseInt(document.getElementById("productPackQty").value),
+      acquisitionCost: Number.parseFloat(document.getElementById("productAcquisitionCost").value),
+      initialStock: Number.parseInt(document.getElementById("productInitialStock").value),
       sellPrice: Number.parseFloat(document.getElementById("productSellPrice").value),
       stock: Number.parseInt(document.getElementById("productStock").value) || 0,
     }
@@ -174,6 +185,11 @@ class ProductsManager {
       // Update sales product dropdown
       if (window.salesManager) {
         window.salesManager.loadProductsDropdown()
+      }
+
+      // Update dashboard
+      if (window.analyticsManager) {
+        window.analyticsManager.updateDashboard()
       }
     } catch (error) {
       console.error("[v0] Error saving product:", error)

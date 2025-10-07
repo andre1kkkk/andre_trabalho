@@ -43,6 +43,8 @@ class AnalyticsManager {
 
       const filteredSales = this.filterSalesByPeriod(sales, this.currentPeriod)
 
+      this.updateFinancialStatus(sales, products)
+
       // Update stats
       this.updateStats(filteredSales, products)
 
@@ -376,6 +378,47 @@ class AnalyticsManager {
       console.error("[v0] Error exporting CSV:", error)
       alert("Erro ao exportar relatório")
     }
+  }
+
+  updateFinancialStatus(sales, products) {
+    // Calculate total investment
+    const totalInvestment = products.reduce((sum, product) => sum + (product.acquisitionCost || 0), 0)
+
+    // Calculate total revenue
+    const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0)
+
+    // Calculate total sales (same as total revenue, showing all-time sales)
+    const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0)
+
+    // Calculate real balance
+    const realBalance = totalRevenue - totalInvestment
+
+    // Determine financial status
+    let status = ""
+    let statusColor = ""
+    const balanceCard = document.getElementById("realBalanceCard")
+
+    if (realBalance < 0) {
+      status = "❌ Prejuízo"
+      statusColor = "var(--danger)"
+      balanceCard.style.backgroundColor = "rgba(239, 68, 68, 0.1)"
+    } else if (realBalance === 0) {
+      status = "⚖️ Break-even"
+      statusColor = "var(--warning)"
+      balanceCard.style.backgroundColor = "rgba(245, 158, 11, 0.1)"
+    } else {
+      status = "✅ Lucro Real"
+      statusColor = "var(--success)"
+      balanceCard.style.backgroundColor = "rgba(16, 185, 129, 0.1)"
+    }
+
+    document.getElementById("totalInvestment").textContent = `R$ ${totalInvestment.toFixed(2)}`
+    document.getElementById("totalRevenue").textContent = `R$ ${totalRevenue.toFixed(2)}`
+    document.getElementById("totalSales").textContent = `R$ ${totalSales.toFixed(2)}`
+    document.getElementById("realBalance").textContent = `R$ ${realBalance.toFixed(2)}`
+    document.getElementById("realBalance").style.color = statusColor
+    document.getElementById("financialStatus").textContent = status
+    document.getElementById("financialStatus").style.color = statusColor
   }
 }
 
