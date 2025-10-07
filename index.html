@@ -360,61 +360,93 @@
 
     <!-- Sale Modal -->
     <div id="saleModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h2 id="saleModalTitle">Registrar Venda</h2>
                 <button class="close-btn">&times;</button>
             </div>
             <form id="saleForm">
                 <input type="hidden" id="saleId">
-                <div class="form-group">
-                    <label>Cliente *</label>
-                    <input type="text" id="saleClient" required>
-                </div>
-                <div class="form-group">
-                    <label>Produto *</label>
-                    <select id="saleProduct" required>
-                        <option value="">Selecione um produto</option>
-                    </select>
-                    <small id="stockAvailable" style="color: var(--text-secondary); margin-top: 0.25rem; display: block;"></small>
-                </div>
+                
+                <!-- Added client and date fields at the top -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Quantidade *</label>
-                        <input type="number" id="saleQuantity" min="1" required>
+                        <label>Cliente *</label>
+                        <input type="text" id="saleClient" required>
                     </div>
                     <div class="form-group">
                         <label>Data *</label>
                         <input type="date" id="saleDate" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Valor Total</label>
-                    <input type="text" id="saleTotal" readonly>
+
+                <!-- Added cart section for multiple products -->
+                <div style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: var(--bg-secondary);">
+                    <h3 style="margin-bottom: 1rem;">Adicionar Produtos</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Produto</label>
+                            <select id="saleProduct">
+                                <option value="">Selecione um produto</option>
+                            </select>
+                            <small id="stockAvailable" style="color: var(--text-secondary); margin-top: 0.25rem; display: block;"></small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade</label>
+                            <input type="number" id="saleQuantity" min="1" value="1">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn-primary" id="addToCartBtn" style="width: 100%;">
+                                ➕ Adicionar
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Status de Pagamento *</label>
-                    <select id="salePaymentStatus" required>
-                        <option value="paid">Pago Totalmente</option>
-                        <option value="partial">Pago Parcialmente</option>
-                        <option value="unpaid">Não Pago</option>
-                    </select>
+
+                <!-- Cart items display -->
+                <div id="cartSection" style="margin-bottom: 1rem;">
+                    <h3 style="margin-bottom: 0.5rem;">Itens da Venda</h3>
+                    <div id="cartItems" style="border: 1px solid var(--border); border-radius: 4px; min-height: 100px; max-height: 300px; overflow-y: auto;">
+                        <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                            Nenhum produto adicionado
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: 4px;">
+                        <strong>Total da Venda:</strong>
+                        <strong id="cartTotal" style="font-size: 1.25rem; color: var(--primary);">R$ 0,00</strong>
+                    </div>
                 </div>
-                <div class="form-group" id="amountPaidGroup" style="display: none;">
-                    <label>Valor Pago</label>
-                    <input type="number" id="saleAmountPaid" step="0.01" min="0">
+
+                <!-- Payment information -->
+                <div style="border-top: 2px solid var(--border); padding-top: 1rem;">
+                    <h3 style="margin-bottom: 1rem;">Informações de Pagamento</h3>
+                    
+                    <div class="form-group">
+                        <label>Status de Pagamento *</label>
+                        <select id="salePaymentStatus" required>
+                            <option value="paid">Pago Totalmente</option>
+                            <option value="partial">Pago Parcialmente</option>
+                            <option value="unpaid">Não Pago</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="amountPaidGroup" style="display: none;">
+                        <label>Valor Pago</label>
+                        <input type="number" id="saleAmountPaid" step="0.01" min="0">
+                    </div>
+                    <div class="form-group" id="dueDateGroup" style="display: none;">
+                        <label>Data Prevista de Pagamento</label>
+                        <input type="date" id="saleDueDate">
+                    </div>
+                    <div class="form-group" id="balanceGroup" style="display: none;">
+                        <label>Saldo em Aberto</label>
+                        <input type="text" id="saleBalance" readonly>
+                    </div>
                 </div>
-                <div class="form-group" id="dueDateGroup" style="display: none;">
-                    <label>Data Prevista de Pagamento</label>
-                    <input type="date" id="saleDueDate">
-                </div>
-                <div class="form-group" id="balanceGroup" style="display: none;">
-                    <label>Saldo em Aberto</label>
-                    <input type="text" id="saleBalance" readonly>
-                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
+                    <button type="submit" class="btn-primary" id="finalizeSaleBtn">Finalizar Venda</button>
                 </div>
             </form>
         </div>
